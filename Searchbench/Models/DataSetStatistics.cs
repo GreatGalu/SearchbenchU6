@@ -1,3 +1,5 @@
+using SearchBench.Services;
+
 namespace SearchBench.Models;
 
 /// <summary>
@@ -7,11 +9,27 @@ namespace SearchBench.Models;
 /// </summary>
 public sealed class DataSetStatistics
 {
+    /// <summary>Datos en el orden original de generación.</summary>
+    public int[] UnsortedData { get; init; } = Array.Empty<int>();
+
+    /// <summary>Datos ordenados para búsqueda binaria.</summary>
+    public int[] SortedData { get; init; } = Array.Empty<int>();
+
+    /// <summary>Tabla hash construida con el conjunto.</summary>
+    public HashTableService? HashTable { get; init; }
+
     /// <summary>Cantidad N de elementos generados.</summary>
     public int Size { get; init; }
 
     /// <summary>Valor máximo posible de una clave (las claves están en el rango [1, KeyRangeMax]).</summary>
     public int KeyRangeMax { get; init; }
+
+    /// <summary>Valor mínimo y máximo realmente generados.</summary>
+    public int MinimumValue { get; init; }
+    public int MaximumValue { get; init; }
+
+    /// <summary>Muestra claves existentes en posiciones inicial, central y final.</summary>
+    public int[] SampleKeys { get; init; } = Array.Empty<int>();
 
     /// <summary>Tiempo de generación de los datos aleatorios, en milisegundos.</summary>
     public double GenerationMilliseconds { get; init; }

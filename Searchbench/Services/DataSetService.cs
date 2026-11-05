@@ -48,7 +48,7 @@ public sealed class DataSetService
     /// Genera un nuevo banco de N claves únicas, ordena una copia y construye la tabla hash,
     /// midiendo el costo de cada fase de preparación.
     /// </summary>
-    public void Generate(int size)
+    public DataSetStatistics GenerateDataSet(int size)
     {
         if (size < MinSize || size > MaxSize)
         {
@@ -76,8 +76,14 @@ public sealed class DataSetService
         SortedData = sorted;
         Statistics = new DataSetStatistics
         {
+            UnsortedData = data,
+            SortedData = sorted,
+            HashTable = _hashTable,
             Size = size,
             KeyRangeMax = _generator.GetMaxKeyValue(size),
+            MinimumValue = data.Min(),
+            MaximumValue = data.Max(),
+            SampleKeys = new[] { data[0], data[data.Length / 2], data[^1] }.Distinct().ToArray(),
             GenerationMilliseconds = generationMs,
             SortMilliseconds = sortMs,
             HashBuildMilliseconds = hashMs,
@@ -87,6 +93,7 @@ public sealed class DataSetService
             HashMaxChainLength = _hashTable.MaxChainLength,
             HashUsedBuckets = _hashTable.UsedBuckets
         };
+        return Statistics;
     }
 
     /// <summary>Devuelve una clave que SÍ existe en el banco (elegida al azar).</summary>

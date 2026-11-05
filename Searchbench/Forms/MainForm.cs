@@ -100,20 +100,30 @@ namespace SearchBench.Forms
                 return;
             }
 
+            btnGenerate.Enabled = false;
+            UseWaitCursor = true;
             try
             {
-                Cursor = Cursors.WaitCursor;
-                _dataSetService.Generate(size);
+                DataSetStatistics stats = _dataSetService.GenerateDataSet(size);
+                dgvResults.Rows.Clear();
+                _runCounter = 0;
+                ShowDataSetInfo();
+                SetSearchControlsEnabled(true);
+                txtKey.Text = stats.SampleKeys[0].ToString(CultureInfo.InvariantCulture);
+                MessageBox.Show(this,
+                    $"¡Conjunto de {stats.Size:N0} datos generados exitosamente! Se han preparado las estructuras para Búsqueda Secuencial, Binaria y Tabla Hash.",
+                    "Generación completada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(this, $"No se pudo generar el conjunto de datos: {exception.Message}",
+                    "Error de generación", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                Cursor = Cursors.Default;
+                UseWaitCursor = false;
+                btnGenerate.Enabled = true;
             }
-
-            ShowDataSetInfo();
-            SetSearchControlsEnabled(true);
-            txtKey.Clear();
-            txtKey.Focus();
         }
 
         private void cmbSize_KeyDown(object? sender, KeyEventArgs e)
@@ -263,7 +273,7 @@ namespace SearchBench.Forms
             }
 
             lblDataInfo.Text =
-                $"N = {stats.Size:N0}   |   Rango de claves: 1 – {stats.KeyRangeMax:N0}   |   " +
+                $"N = {stats.Size:N0}   |   Mínimo: {stats.MinimumValue:N0}   |   Máximo: {stats.MaximumValue:N0}   |   " +
                 $"Generación: {stats.GenerationMilliseconds:N2} ms   |   " +
                 $"Ordenamiento previo (para la binaria): {stats.SortMilliseconds:N2} ms   |   " +
                 $"Construcción de la tabla hash: {stats.HashBuildMilliseconds:N2} ms" +
@@ -272,7 +282,8 @@ namespace SearchBench.Forms
                 $"Factor de carga: {stats.HashLoadFactor:N2}   |   " +
                 $"Colisiones: {stats.HashCollisions:N0}   |   " +
                 $"Cadena más larga: {stats.HashMaxChainLength}   |   " +
-                $"Cubetas ocupadas: {stats.HashUsedBuckets:N0}";
+                $"Cubetas ocupadas: {stats.HashUsedBuckets:N0}" + Environment.NewLine +
+                $"Claves existentes de muestra: {string.Join(", ", stats.SampleKeys.Select(key => key.ToString("N0", CultureInfo.CurrentCulture)))}";
         }
 
         /// <summary>Agrega al panel comparativo una fila por cada resultado de la ejecución actual.</summary>
